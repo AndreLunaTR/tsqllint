@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -44,8 +46,8 @@ namespace TSQLLint
 
         public void Run()
         {
-            configReader.LoadConfig(commandLineOptions.ConfigFile);
-
+            // configReader.LoadConfig(commandLineOptions.ConfigFile);
+            configReader.LoadConfig("C:\\Users\\C282466\\.tsqllintrc");
             var fragmentBuilder = new FragmentBuilder(configReader.CompatabilityLevel);
             var ruleVisitorBuilder = new RuleVisitorBuilder(configReader, this.reporter);
             var ruleVisitor = new SqlRuleVisitor(ruleVisitorBuilder, fragmentBuilder, reporter);
@@ -54,9 +56,10 @@ namespace TSQLLint
 
             pluginHandler.ProcessPaths(configReader.GetPlugins());
             var response = commandLineOptionHandler.Handle(new CommandLineRequestMessage(commandLineOptions));
+
             if (response.ShouldLint)
             {
-                fileProcessor.ProcessList(commandLineOptions.LintPath);
+                fileProcessor.ProcessList(commandLineOptions.LintSqlQueries);
             }
 
             if (fileProcessor.FileCount > 0)
@@ -66,7 +69,7 @@ namespace TSQLLint
 
             if (!response.Success)
             {
-                Environment.ExitCode = 1;
+                 Environment.ExitCode = 1;
             }
         }
     }

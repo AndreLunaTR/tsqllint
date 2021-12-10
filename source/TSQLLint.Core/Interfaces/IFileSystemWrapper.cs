@@ -4,7 +4,7 @@ namespace TSQLLint.Core.Interfaces
     {
         bool FileExists(string path);
 
-        bool PathIsValidForLint(string path);
+        //bool PathIsValidForLint(string path);
 
         string CombinePath(params string[] paths);
     }

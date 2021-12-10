@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TSQLLint.Common;
@@ -25,7 +26,7 @@ namespace TSQLLint.Infrastructure.Parser
 
         private readonly IRuleExceptionFinder ruleExceptionFinder;
 
-        private ConcurrentDictionary<string, Stream> fileStreams = new ConcurrentDictionary<string, Stream>();
+        private ConcurrentDictionary<string, Stream> queryStreams = new ConcurrentDictionary<string, Stream>();
 
         public SqlFileProcessor(IRuleVisitor ruleVisitor, IPluginHandler pluginHandler, IReporter reporter, IFileSystem fileSystem)
         {
@@ -45,66 +46,44 @@ namespace TSQLLint.Infrastructure.Parser
             }
         }
 
-        public void ProcessList(List<string> filePaths)
+        public void ProcessList(List<string> sqlQueries)
         {
-            Parallel.ForEach(filePaths, (path) =>
+            Parallel.ForEach(sqlQueries, (query) =>
+            {                
+                processSqlQuery(query);
+            });            
+
+            foreach (var query in queryStreams)
             {
-                processPath(path);
+                HandleProcessing(query.Key, query.Value);
+                query.Value.Dispose();
+            }
+        }
+
+        public void ProcessSqlQuery(string query)
+        {
+            processSqlQuery(query);            
+
+            foreach (var sqlQuery in queryStreams)
+            {
+                HandleProcessing(sqlQuery.Key, sqlQuery.Value);
+                sqlQuery.Value.Dispose();
+            }
+        }
+        
+        private void processSqlQuery(string query)
+        {           
+            var queriesList = query.Split('|');
+            
+            Parallel.ForEach(queriesList, (query) =>
+            {               
+                ProcessQuery(query);               
             });
-
-            foreach (var sqlFile in fileStreams)
-            {
-                HandleProcessing(sqlFile.Key, sqlFile.Value);
-                sqlFile.Value.Dispose();
-            }
-        }
-
-        public void ProcessPath(string path)
-        {
-            processPath(path);
-            foreach (var sqlFile in fileStreams)
-            {
-                HandleProcessing(sqlFile.Key, sqlFile.Value);
-                sqlFile.Value.Dispose();
-            }
-        }
-
-        private void processPath(string path)
-        {
-            // remove quotes from filePaths
-            path = path.Replace("\"", string.Empty);
-
-            var filePathList = path.Split(',');
-            for (var index = 0; index < filePathList.Length; index++)
-            {
-                // remove leading and trailing whitespace
-                filePathList[index] = filePathList[index].Trim();
-            }
-
-            Parallel.ForEach(filePathList, (filePath) =>
-            {
-                if (!fileSystem.File.Exists(filePath))
-                {
-                    if (fileSystem.Directory.Exists(filePath))
-                    {
-                        ProcessDirectory(filePath);
-                    }
-                    else
-                    {
-                        ProcessWildCard(filePath);
-                    }
-                }
-                else
-                {
-                    ProcessFile(filePath);
-                }
-            });
-        }
-
-        private void ProcessFile(string filePath)
-        {
-            var fileStream = GetFileContents(filePath);
-            AddToProcessing(filePath, fileStream);
+        }       
+        private void ProcessQuery(string query)
+        {            
+            var queryStream = GetQueryContentAsStream(query);           
+            AddToProcessing(query, queryStream);
             
             Interlocked.Increment(ref _fileCount);
         }
@@ -124,7 +103,7 @@ namespace TSQLLint.Infrastructure.Parser
             }
 
             var lineCount = 0;
-            using (var reader = new StreamReader(GetFileContents(filePath)))
+            using (var reader = new StreamReader(GetQueryContentAsStream(filePath)))
             {
                 while (reader.ReadLine() != null)
                 {
@@ -134,14 +113,15 @@ namespace TSQLLint.Infrastructure.Parser
 
             return lineOneRuleIgnores.Any(x => x.EndLine == lineCount);
         }
-
-        private void AddToProcessing(string filePath, Stream fileStream)
-        {
-            fileStreams.TryAdd(filePath, fileStream);
+        
+        private void AddToProcessing(string query, Stream queryStream)
+        {            
+            queryStreams.TryAdd(query, queryStream);
         }
 
         private void HandleProcessing(string filePath, Stream fileStream)
-        {
+        {           
+
             var ignoredRules = ruleExceptionFinder.GetIgnoredRuleList(fileStream).ToList();
             if (IsWholeFileIgnored(filePath, ignoredRules))
             {
@@ -149,59 +129,7 @@ namespace TSQLLint.Infrastructure.Parser
             }
             ProcessRules(fileStream, ignoredRules, filePath);
             ProcessPlugins(fileStream, ignoredRules, filePath);
-        }
-
-        private void ProcessDirectory(string path)
-        {
-            var subDirectories = fileSystem.Directory.GetDirectories(path);
-            Parallel.ForEach(subDirectories, (filePath) =>
-            {
-                processPath(filePath);
-            });
-            
-            var fileEntries = fileSystem.Directory.GetFiles(path);
-            Parallel.ForEach(fileEntries, (file) =>
-            {
-                ProcessIfSqlFile(file);
-            });
-        }
-
-        private void ProcessIfSqlFile(string fileName)
-        {
-            if (fileSystem.Path.GetExtension(fileName).Equals(".sql", StringComparison.InvariantCultureIgnoreCase))
-            {
-                ProcessFile(fileName);
-            }
-        }
-
-        private void ProcessWildCard(string filePath)
-        {
-            var containsWildCard = filePath.Contains("*") || filePath.Contains("?");
-            if (!containsWildCard)
-            {
-                reporter.Report($"{filePath} is not a valid file path.");
-                return;
-            }
-
-            var dirPath = fileSystem.Path.GetDirectoryName(filePath);
-            if (string.IsNullOrEmpty(dirPath))
-            {
-                dirPath = fileSystem.Directory.GetCurrentDirectory();
-            }
-
-            if (!fileSystem.Directory.Exists(dirPath))
-            {
-                reporter.Report($"Directory does not exist: {dirPath}");
-                return;
-            }
-
-            var searchPattern = fileSystem.Path.GetFileName(filePath);
-            var files = fileSystem.Directory.EnumerateFiles(dirPath, searchPattern, SearchOption.TopDirectoryOnly);
-            Parallel.ForEach(files, (file) =>
-            {
-                ProcessIfSqlFile(file);
-            });
-        }
+        }       
 
         private void ProcessRules(Stream fileStream, IEnumerable<IRuleException> ignoredRules, string filePath)
         {
@@ -214,9 +142,9 @@ namespace TSQLLint.Infrastructure.Parser
             pluginHandler.ActivatePlugins(new PluginContext(filePath, ignoredRules, textReader));
         }
 
-        private Stream GetFileContents(string filePath)
-        {
-            return fileSystem.File.OpenRead(filePath);
+        private Stream GetQueryContentAsStream(string query)
+        {            
+            return new MemoryStream(Encoding.ASCII.GetBytes(query));
         }
     }
 }

@@ -32,7 +32,8 @@ namespace TSQLLint.Core.UseCases.Console
             {
                 var strategy = new PrintUsageStrategy(reporter);
                 strategy.HandleCommandLineOptions(request.CommandLineOptions);
-                return new HandlerResponseMessage(false, false);
+                //return new HandlerResponseMessage(false, false);
+                return new HandlerResponseMessage(true, false);
             }
             
             if (request.CommandLineOptions.Help)
@@ -71,7 +72,8 @@ namespace TSQLLint.Core.UseCases.Console
                 return strategy.HandleCommandLineOptions(request.CommandLineOptions);
             }
 
-            if (request.CommandLineOptions.LintPath.Any())
+            //if (request.CommandLineOptions.LintPath.Any())
+            if (request.CommandLineOptions.LintSqlQueries.Any())
             {
                 var strategy = new ValidatePathStrategy(reporter, fileSystemWrapper);
                 return strategy.HandleCommandLineOptions(request.CommandLineOptions);

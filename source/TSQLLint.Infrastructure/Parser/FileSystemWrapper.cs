@@ -19,15 +19,15 @@ namespace TSQLLint.Infrastructure.Parser
             return fileSystem.File.Exists(path);
         }
 
-        public bool PathIsValidForLint(string path)
-        {
-            path = RemoveQuotes(path);
-            if (!fileSystem.File.Exists(path))
-            {
-                return fileSystem.Directory.Exists(path) || PathContainsWildCard(path);
-            }
-            return true;
-        }
+        //public bool PathIsValidForLint(string path)
+        //{
+        //    path = RemoveQuotes(path);
+        //    if (!fileSystem.File.Exists(path))
+        //    {
+        //        return fileSystem.Directory.Exists(path) || PathContainsWildCard(path);
+        //    }
+        //    return true;
+        //}
 
         private static bool PathContainsWildCard(string filePath)
         {

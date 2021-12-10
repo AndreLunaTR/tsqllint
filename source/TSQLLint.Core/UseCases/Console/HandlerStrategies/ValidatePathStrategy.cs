@@ -18,15 +18,21 @@ namespace TSQLLint.Core.UseCases.Console.HandlerStrategies
 
         public HandlerResponseMessage HandleCommandLineOptions(ICommandLineOptions commandLineOptions)
         {
-            var invalidPaths = commandLineOptions.LintPath.Count(path => !fileSystem.PathIsValidForLint(path));
-            if (invalidPaths < commandLineOptions.LintPath.Count)
-            {
+            //var invalidPaths = commandLineOptions.LintPath.Count(path => !fileSystem.PathIsValidForLint(path));
+            //var invalidPath = commandLineOptions.LintSqlQueries.Count(query => !fileSystem.PathIsValidForLint());
+
+
+            //if (invalidPaths < commandLineOptions.LintSqlQueries.Count)
+            //{
                 // if there are valid paths then signal success and lint
                 return new HandlerResponseMessage(true, true);
-            }
+            //}
 
-            reporter.Report("No valid file paths provided");
-            return new HandlerResponseMessage(false, false);
+            //reporter.Report("No valid file paths provided");
+            //return new HandlerResponseMessage(false, false);
+
+            //reporter.Report("No valid file paths provided");
+            //return new HandlerResponseMessage(true, true);
         }
     }
 }

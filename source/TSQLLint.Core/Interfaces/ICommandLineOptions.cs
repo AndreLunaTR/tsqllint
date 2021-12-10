@@ -14,7 +14,8 @@ namespace TSQLLint.Core.Interfaces
 
         bool Init { get; set; }
 
-        List<string> LintPath { get; set; }
+        //List<string> LintPath { get; set; }
+        List<string> LintSqlQueries { get; set; }
 
         bool ListPlugins { get; set; }
 

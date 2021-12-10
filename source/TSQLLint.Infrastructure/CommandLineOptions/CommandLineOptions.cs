@@ -37,7 +37,8 @@ namespace TSQLLint.Infrastructure.CommandLineOptions
         public bool Init { get; set; }
 
         [ValueList(typeof(List<string>))]
-        public List<string> LintPath { get; set; }
+        //public List<string> LintPath { get; set; }
+        public List<string> LintSqlQueries { get; set; }
 
         [Option(
             'p',

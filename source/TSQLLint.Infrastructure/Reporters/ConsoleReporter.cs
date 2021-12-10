@@ -19,7 +19,8 @@ namespace TSQLLint.Infrastructure.Reporters
 
         public void ReportResults(TimeSpan timespan, int fileCount)
         {
-            Report($"\nLinted {fileCount} files in {timespan.TotalSeconds} seconds\n\n{errorCount} Errors.\n{warningCount} Warnings");
+            // Report($"\nLinted {fileCount} files in {timespan.TotalSeconds} seconds\n\n{errorCount} Errors.\n{warningCount} Warnings");
+            Report($"\nLinted {fileCount} SQL Sections in {timespan.TotalSeconds} seconds\n\n{errorCount} Errors.\n{warningCount} Warnings");
         }
 
         public void ReportFileResults()

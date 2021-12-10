@@ -24,7 +24,8 @@ namespace TSQLLint.Core.UseCases.Console.HandlerStrategies
                 reporter.Report($"Config file not found at: {commandLineOptions.ConfigFile} use the '--init' option to create if one does not exist or the '--force' option to overwrite");
             }
 
-            if (!commandLineOptions.LintPath.Any())
+            //if (!commandLineOptions.LintPath.Any())
+            if (!commandLineOptions.LintSqlQueries.Any())
             {
                 reporter.Report(commandLineOptions.GetUsage());
                 return new HandlerResponseMessage(true, false);

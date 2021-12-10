@@ -8,6 +8,6 @@ namespace TSQLLint.Core.Interfaces
 
         void ProcessList(List<string> filePaths);
 
-        void ProcessPath(string path);
+        void ProcessSqlQuery(string path);
     }
 }

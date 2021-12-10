@@ -34,7 +34,7 @@ namespace TSQLLint.Tests.UnitTests.Parser
             fileSystem.File.Returns(fileBase);
 
             // act
-            processor.ProcessPath("\" " + filePath + " \""); // Also testing removal of quotes and leading/trailing spaces
+            processor.ProcessSqlQuery("\" " + filePath + " \""); // Also testing removal of quotes and leading/trailing spaces
 
             // assert
             fileBase.Received().Exists(filePath);
@@ -75,7 +75,7 @@ namespace TSQLLint.Tests.UnitTests.Parser
             var processor = new SqlFileProcessor(ruleVisitor, pluginHandler, reporter, fileSystem);
 
             // act
-            processor.ProcessPath(TestHelper.GetTestFilePath(@"c:\dbscripts"));
+            processor.ProcessSqlQuery(TestHelper.GetTestFilePath(@"c:\dbscripts"));
 
             // assert
             ruleVisitor.Received().VisitRules(filePath1, Arg.Any<IEnumerable<IExtendedRuleException>>(), Arg.Any<Stream>());
@@ -117,7 +117,7 @@ namespace TSQLLint.Tests.UnitTests.Parser
             var processor = new SqlFileProcessor(ruleVisitor, pluginHandler, reporter, fileSystem);
 
             // act
-            processor.ProcessPath(TestHelper.GetTestFilePath(@"c:\dbscripts"));
+            processor.ProcessSqlQuery(TestHelper.GetTestFilePath(@"c:\dbscripts"));
 
             // assert
             ruleVisitor.Received().VisitRules(filePath1, Arg.Any<IEnumerable<IExtendedRuleException>>(), Arg.Any<Stream>());
@@ -148,7 +148,7 @@ namespace TSQLLint.Tests.UnitTests.Parser
             var processor = new SqlFileProcessor(ruleVisitor, pluginHandler, reporter, fileSystem);
 
             // act
-            processor.ProcessPath(filePath);
+            processor.ProcessSqlQuery(filePath);
 
             // assert
             fileBase.Received().Exists(filePath);
@@ -190,7 +190,7 @@ namespace TSQLLint.Tests.UnitTests.Parser
             var processor = new SqlFileProcessor(ruleVisitor, pluginHandler, reporter, fileSystem);
 
             // act
-            processor.ProcessPath(TestHelper.GetTestFilePath(@"c:\dbscripts\file?.sql"));
+            processor.ProcessSqlQuery(TestHelper.GetTestFilePath(@"c:\dbscripts\file?.sql"));
 
             // assert
             ruleVisitor.Received().VisitRules(filePath1, Arg.Any<IEnumerable<IExtendedRuleException>>(), Arg.Any<Stream>());
@@ -236,7 +236,7 @@ namespace TSQLLint.Tests.UnitTests.Parser
             var processor = new SqlFileProcessor(ruleVisitor, pluginHandler, reporter, fileSystem);
 
             // act
-            processor.ProcessPath(TestHelper.GetTestFilePath(@"c:\dbscripts\file*.*"));
+            processor.ProcessSqlQuery(TestHelper.GetTestFilePath(@"c:\dbscripts\file*.*"));
 
             // assert
             ruleVisitor.Received().VisitRules(filePath1, Arg.Any<IEnumerable<IExtendedRuleException>>(), Arg.Any<Stream>());
@@ -269,7 +269,7 @@ namespace TSQLLint.Tests.UnitTests.Parser
             var processor = new SqlFileProcessor(ruleVisitor, pluginHandler, reporter, fileSystem);
 
             // act
-            processor.ProcessPath(TestHelper.GetTestFilePath(@"c:\doesntExist\file*.*"));
+            processor.ProcessSqlQuery(TestHelper.GetTestFilePath(@"c:\doesntExist\file*.*"));
 
             // assert
             ruleVisitor.DidNotReceive().VisitRules(sqlFilePath1, Arg.Any<IEnumerable<IExtendedRuleException>>(), Arg.Any<Stream>());
@@ -314,7 +314,7 @@ namespace TSQLLint.Tests.UnitTests.Parser
             var processor = new SqlFileProcessor(ruleVisitor, pluginHandler, reporter, fileSystem);
 
             // act
-            processor.ProcessPath(@"file*.*");
+            processor.ProcessSqlQuery(@"file*.*");
 
             // assert
             ruleVisitor.Received().VisitRules(sqlFilePath1, Arg.Any<IEnumerable<IExtendedRuleException>>(), Arg.Any<Stream>());
@@ -350,7 +350,7 @@ namespace TSQLLint.Tests.UnitTests.Parser
             var processor = new SqlFileProcessor(ruleVisitor, pluginHandler, reporter, fileSystem);
 
             // act
-            processor.ProcessPath(TestHelper.GetTestFilePath(@"c:\dbscripts\invalid*.*"));
+            processor.ProcessSqlQuery(TestHelper.GetTestFilePath(@"c:\dbscripts\invalid*.*"));
 
             // assert
             ruleVisitor.DidNotReceive().VisitRules(filePath1, Arg.Any<IEnumerable<IExtendedRuleException>>(), Arg.Any<Stream>());
